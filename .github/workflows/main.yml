@@ -52,11 +52,26 @@ jobs:
         run: |
           tar cvzf ${{ format( 'wamr-{0}.tar.gz', matrix.build_type) }} inst
           
-      - name: publish release
-        uses: gacts/upload-to-release@v1.0.1
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          file: ${{ format( 'wamr-{0}.tar.gz', matrix.build_type) }}
-          type: application/gzip
+          tag_name: ${{ github.ref }}
+          release_name: ${{ github.ref }}
+          draft: false
+          prerelease: true
+          
+      - name: Publish Release Attachment
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ${{ format( 'wamr-{0}.tar.gz', matrix.build_type) }}
+          asset_name: ${{ format( 'wamr-{0}.tar.gz', matrix.build_type) }}
+          asset_content_type: application/gzip
             
         
           
